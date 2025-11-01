@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - JewelleryMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">💎 JewelleryMS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="login.html">Admin Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Form -->
+  <div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+      <div class="col-md-5">
+        <div class="card card-custom fade-in">
+          <div class="card-body p-5">
+            <h3 class="text-center mb-4" style="color: var(--primary-gold); font-family: 'Cinzel', serif;">
+              Admin Login
+            </h3>
+            <form id="loginForm">
+              <div class="mb-4">
+                <label class="form-label" style="color: var(--brown); font-weight: 500;">Username</label>
+                <input type="text" id="username" class="form-control form-control-custom" required>
+              </div>
+              <div class="mb-4">
+                <label class="form-label" style="color: var(--brown); font-weight: 500;">Password</label>
+                <input type="password" id="password" class="form-control form-control-custom" required>
+              </div>
+              <button type="submit" class="btn btn-gold w-100 mb-3">Login</button>
+            </form>
+            <div id="message"></div>
+            <div class="text-center">
+              <span style="color: var(--brown);">Don't have an account? </span>
+              <a href="register.html" style="color: var(--primary-gold); text-decoration: none; font-weight: 500;">Register here</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const messageDiv = document.getElementById('message');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        messageDiv.innerHTML = '<div class="message error">Please fill in all fields.</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BASE_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          localStorage.setItem('loggedIn', 'true');
+          localStorage.setItem('adminId', data.adminId);
+          window.location.href = 'dashboard.html';
+        } else {
+          messageDiv.innerHTML = `<div class="message error">${data.error || 'Login failed'}</div>`;
+        }
+      } catch (error) {
+        messageDiv.innerHTML = '<div class="message error">Network error. Please try again.</div>';
+      }
+    });
+  </script>
+</body>
+</html>
