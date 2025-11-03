@@ -59,6 +59,7 @@ function updateItemDropdown() {
     const option = document.createElement('option');
     option.value = item.item_id;
     option.textContent = item.item_name + ' (' + formatCurrency(item.price) + ')';
+    option.dataset.price=item.price;
     select.appendChild(option);
   });
 }
@@ -105,8 +106,33 @@ async function saveSale(e) {
       await apiCall('/sales', {
         method: 'POST',
         body: JSON.stringify(saleData)
+      
       });
     }
+           // 🆕 Reduce item stock after sale
+try {
+  // Fetch the sold item's current data
+  const itemData = await apiCall(`/items/${itemId}`);
+  const newStock = Math.max(0, itemData.stock - quantity);
+
+  // Update the stock in inventory
+  await apiCall(`/items/${itemId}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      ...itemData,
+      stock: newStock
+    })
+  });
+
+  // Refresh inventory display if available
+  if (typeof fetchItems === 'function') {
+    fetchItems();
+  }
+
+  console.log(`Stock updated for item ${itemId}: ${itemData.stock} → ${newStock}`);
+} catch (stockError) {
+  console.error('Error updating stock:', stockError);
+}
 
     clearSaleForm();
     await fetchSales();
@@ -200,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Update dropdowns when items are loaded
+  document.addEventListener('itemsLoaded',updateItemDropdown)
   setTimeout(() => {
     updateItemDropdown();
   }, 1000);

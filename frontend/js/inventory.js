@@ -8,6 +8,7 @@ async function fetchItems() {
     filteredItems = [...items];
     renderItems();
     updateItemCount();
+    document.dispatchEvent(new Event('itemsLoaded'));
   } catch (error) {
     console.error('Error fetching items:', error);
   }

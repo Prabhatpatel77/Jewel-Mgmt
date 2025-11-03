@@ -21,7 +21,7 @@
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
           <li class="nav-item"><a class="nav-link active" href="dashboard.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="login.html">Admin Login</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" href="login.html">Admin Login</a></li> -->
           <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
           <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
         </ul>
@@ -230,10 +230,21 @@
   <script src="js/customers.js"></script>
   <script src="js/sales.js"></script>
   <script>
-    // Check if user is logged in
-    if (localStorage.getItem('loggedIn') !== 'true') {
+   
+ 
+    // login checked using loacalstorage token
+    document.addEventListener('DOMContentLoaded',()=>{
+      if (localStorage.getItem('loggedIn') !== 'true') {
       window.location.href = 'login.html';
     }
+    });
+
+     const admin = localStorage.getItem('adminName');
+    if (admin) {
+      const brand = document.querySelector('.navbar-brand');
+      if (brand) brand.textContent += ` (Welcome, ${admin})`;
+    }
+   
 
     // Logout function
     function logout() {
@@ -244,15 +255,32 @@
       }
     }
 
-    // Set today's date as default for sales
-    document.getElementById('saleDate').value = new Date().toISOString().split('T')[0];
+    
+    document.getElementById('saleDate').value = new Date().toISOString().split('T')[0];//current date
 
     // Initialize all modules
     document.addEventListener('DOMContentLoaded', function() {
       // Load data for all modules
-      if (typeof fetchItems === 'function') fetchItems();
-      if (typeof fetchCustomers === 'function') fetchCustomers();
-      if (typeof fetchSales === 'function') fetchSales();
+      try{
+        if (typeof fetchItems === 'function') fetchItems();
+       
+      }catch(e){
+        console.error(e);
+      }
+       try{
+       
+        if (typeof fetchCustomers === 'function') fetchCustomers();
+    
+      }catch(e){
+        console.error(e);
+      }
+       try{
+       
+        if (typeof fetchSales === 'function') fetchSales();
+      }catch(e){
+        console.error(e);
+      }
+      
     });
   </script>
 </body>

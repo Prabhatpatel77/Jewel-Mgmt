@@ -86,12 +86,24 @@ app.put('/api/items/:id', (req, res) => {
   );
 });
 
+// app.delete('/api/items/:id', (req, res) => {
+//   db.query('DELETE FROM items WHERE item_id = ?', [req.params.id], (err) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ success: true, message: 'Item deleted' });
+//   });
+// });
 app.delete('/api/items/:id', (req, res) => {
   db.query('DELETE FROM items WHERE item_id = ?', [req.params.id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: 'Item deleted' });
+    if (err) {
+      if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+        return res.json({ success: false, error: 'Cannot delete: Item has related sales.' });
+      }
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ success: true, message: 'Item deleted successfully!' });
   });
 });
+
 
 // Customers CRUD
 app.get('/api/customers', (req, res) => {
@@ -125,12 +137,24 @@ app.put('/api/customers/:id', (req, res) => {
   );
 });
 
+// app.delete('/api/customers/:id', (req, res) => {
+//   db.query('DELETE FROM customers WHERE cust_id = ?', [req.params.id], (err) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ success: true, message: 'Customer deleted' });
+//   });
+// });
 app.delete('/api/customers/:id', (req, res) => {
   db.query('DELETE FROM customers WHERE cust_id = ?', [req.params.id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: 'Customer deleted' });
+    if (err) {
+      if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+        return res.json({ success: false, error: 'Cannot delete: Customer has related sales.' });
+      }
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ success: true, message: 'Customer deleted successfully!' });
   });
 });
+
 
 // Sales CRUD
 app.get('/api/sales', (req, res) => {
@@ -157,6 +181,29 @@ app.post('/api/sales', (req, res) => {
     }
   );
 });
+// app.post('/api/sales', (req, res) => {
+//   const { cust_id, item_id, quantity, total_amount, sale_date } = req.body;
+
+//   // 1️⃣ Insert sale record
+//   db.query(
+//     'INSERT INTO sales (cust_id, item_id, quantity, total_amount, sale_date) VALUES (?, ?, ?, ?, ?)',
+//     [cust_id, item_id, quantity, total_amount, sale_date],
+//     (err, result) => {
+//       if (err) return res.status(500).json({ error: err.message });
+
+//       // 2️⃣ Reduce item stock after successful sale
+//       db.query(
+//         'UPDATE items SET stock = GREATEST(stock - ?, 0) WHERE item_id = ?',
+//         [quantity, item_id],
+//         (err2) => {
+//           if (err2) return res.status(500).json({ error: 'Sale saved, but failed to update stock.' });
+//           res.json({ success: true, message: 'Sale recorded and stock updated successfully!' });
+//         }
+//       );
+//     }
+//   );
+// });
+
 
 app.put('/api/sales/:id', (req, res) => {
   const { cust_id, item_id, quantity, total_amount, sale_date } = req.body;
@@ -169,6 +216,45 @@ app.put('/api/sales/:id', (req, res) => {
     }
   );
 });
+// app.put('/api/sales/:id', (req, res) => {
+//   const { cust_id, item_id, quantity, total_amount, sale_date } = req.body;
+//   const saleId = req.params.id;
+
+//   // 1️⃣ Get old sale quantity
+//   db.query('SELECT quantity, item_id FROM sales WHERE sale_id = ?', [saleId], (err, results) => {
+//     if (err || results.length === 0) return res.status(500).json({ error: 'Failed to fetch previous sale' });
+
+//     const oldQty = results[0].quantity;
+//     const oldItemId = results[0].item_id;
+//     const qtyDiff = quantity - oldQty;
+
+//     // 2️⃣ Update sale record
+//     db.query(
+//       'UPDATE sales SET cust_id=?, item_id=?, quantity=?, total_amount=?, sale_date=? WHERE sale_id=?',
+//       [cust_id, item_id, quantity, total_amount, sale_date, saleId],
+//       (err2) => {
+//         if (err2) return res.status(500).json({ error: err2.message });
+
+//         // 3️⃣ Adjust stock (restore old qty, then apply new qty)
+//         const stockUpdateQuery =
+//           oldItemId === item_id
+//             ? 'UPDATE items SET stock = GREATEST(stock - ?, 0) WHERE item_id = ?'
+//             : 'UPDATE items SET stock = stock + ? WHERE item_id = ?; UPDATE items SET stock = GREATEST(stock - ?, 0) WHERE item_id = ?';
+
+//         const params =
+//           oldItemId === item_id
+//             ? [qtyDiff, item_id]
+//             : [oldQty, oldItemId, quantity, item_id];
+
+//         db.query(stockUpdateQuery, params, (err3) => {
+//           if (err3) return res.status(500).json({ error: 'Sale updated, but failed to adjust stock.' });
+//           res.json({ success: true, message: 'Sale and stock updated successfully!' });
+//         });
+//       }
+//     );
+//   });
+// });
+
 
 app.delete('/api/sales/:id', (req, res) => {
   db.query('DELETE FROM sales WHERE sale_id = ?', [req.params.id], (err) => {

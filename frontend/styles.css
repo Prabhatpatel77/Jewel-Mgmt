@@ -40,9 +40,11 @@ body {
   padding: 8px 16px !important;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--primary-gold) !important;
   background: rgba(212, 164, 55, 0.1);
+  border-color: var(--primary-gold);
 }
 
 /* Search Bar */
@@ -153,7 +155,18 @@ body {
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, var(--light-gold) 0%, var(--cream) 100%);
+  position:relative;
+  background-image:url('assets/jewelry-bg.jpg');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  text-shadow: 1px 1px 6px rgba(0,0,0,0.7);
+  /* background: linear-gradient(135deg, var(--light-gold) 0%, var(--cream) 100%); */
   padding: 100px 0;
   text-align: center;
   min-height: 100vh;
@@ -189,8 +202,9 @@ body {
 }
 
 .nav-tabs-custom .nav-link.active {
-  background: var(--primary-gold);
-  color: white;
+  background: var(--primary-gold) !important;
+  color: white !important;
+  border-color: var(--primary-gold) !important;
 }
 
 .tab-content-custom {
